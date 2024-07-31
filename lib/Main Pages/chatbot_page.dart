@@ -38,7 +38,7 @@ class _ChatPageState extends State<ChatPage> {
     final res = await http.post(
       url,
       headers: <String, String>{
-        'Content-Type': 'application/json; charset=UTF-8',
+        'Content-Type': 'application/json',
       },
       body: jsonEncode(<String, String>{
         "user_question": message,
@@ -46,8 +46,11 @@ class _ChatPageState extends State<ChatPage> {
     );
 
     if (res.statusCode == 200 || res.statusCode == 201) {
-      print('Response data: ${res.body}');
-      return res.body;
+      var data1 = utf8.decode(res.bodyBytes);
+      var data = jsonDecode(data1);
+
+      print('Response data: ${data['text']}');
+      return data['text'].toString();
     } else {
       print('Failed to send POST request. Status code: ${res.statusCode}');
       return "";
@@ -73,7 +76,7 @@ class _ChatPageState extends State<ChatPage> {
     final res = await http.post(
       url,
       headers: <String, String>{
-        'Content-Type': 'application/json; charset=UTF-8',
+        'Content-Type': 'application/json',
       },
       body: jsonEncode(<String, String>{
         "plantName": plantName,
@@ -82,13 +85,15 @@ class _ChatPageState extends State<ChatPage> {
     );
 
     if (res.statusCode == 200 || res.statusCode == 201) {
-      print('Response data: ${res.body}');
+      var data1 = utf8.decode(res.bodyBytes);
+      var data = jsonDecode(data1);
+      print('Response data: ${data['text']}');
       setState(() {
         final cureAnswer = types.TextMessage(
           author: _assistant,
           createdAt: DateTime.now().millisecondsSinceEpoch,
           id: randomString(),
-          text: res.body,
+          text: data['text'].toString(),
         );
 
         _messages.add(cureAnswer);
@@ -104,7 +109,7 @@ class _ChatPageState extends State<ChatPage> {
     final res = await http.post(
       url,
       headers: <String, String>{
-        'Content-Type': 'application/json; charset=UTF-8',
+        'Content-Type': 'application/json',
       },
     );
 
@@ -166,18 +171,22 @@ class _ChatPageState extends State<ChatPage> {
         ),
         body: Chat(
           messages: _messages,
-          // onAttachmentPressed: _handleAttachmentPressed,
           onMessageTap: _handleMessageTap,
           onPreviewDataFetched: _handlePreviewDataFetched,
           onSendPressed: _handleSendPressed,
           user: _user,
           theme: const DefaultChatTheme(),
+          showUserNames: true,
         ),
       );
 
   void _addMessage(types.Message message) {
     setState(() {
+      // print(message.toJson()['text']);
       _messages.insert(0, message);
+      print('------------------');
+      print(_messages);
+      print('------------------');
     });
   }
 
